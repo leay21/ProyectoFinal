@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FFFFFFFF</color>
+    <color name="white">#FF000000</color>
+
+    <color name="guinda_ipn">#8A457B</color>
+    <color name="guinda_ipn_dark">#4A1F41</color>
+    <color name="guinda_bg_header">#4A1F41</color> <color name="azul_escom">#336699</color>
+    <color name="azul_escom_dark">#002645</color>
+
+    <color name="bg_screen">#121212</color> <color name="bg_card">#1E1E1E</color>   <color name="text_primary">#FFFFFF</color> <color name="text_secondary">#AAAAAA</color>
+    <color name="overlay_black">#CC000000</color>
+</resources>

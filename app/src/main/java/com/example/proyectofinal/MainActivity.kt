@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.proyectofinal.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -31,6 +31,17 @@ class MainActivity : AppCompatActivity() {
         binding.btnIrDirectorio.setOnClickListener {
             val intent = Intent(this, DirectorioActivity::class.java)
             startActivity(intent)
+        }
+        binding.btnCambiarTema.setOnClickListener {
+            // Leemos el tema actual y cambiamos al otro
+            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            val actual = prefs.getString("tema", "guinda")
+
+            if (actual == "guinda") {
+                cambiarTema("azul") // Función heredada de BaseActivity
+            } else {
+                cambiarTema("guinda")
+            }
         }
     }
 }

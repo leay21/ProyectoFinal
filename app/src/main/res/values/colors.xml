@@ -10,5 +10,9 @@
     <color name="azul_escom">#003D6D</color>
     <color name="azul_escom_dark">#002645</color>
 
-    <color name="gris_fondo">#F5F5F5</color>
-    <color name="overlay_black">#CC000000</color> </resources>
+    <color name="bg_screen">#F5F5F5</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="text_primary">#000000</color>
+    <color name="text_secondary">#555555</color>
+    <color name="overlay_black">#CC000000</color>
+</resources>

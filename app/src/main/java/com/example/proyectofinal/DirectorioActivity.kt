@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.proyectofinal.databinding.ActivityDirectorioBinding
 
-class DirectorioActivity : AppCompatActivity() {
+class DirectorioActivity : BaseActivity() {
 
     private lateinit var binding: ActivityDirectorioBinding
     private lateinit var adapter: InstitucionAdapter

@@ -1,12 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Theme.ProyectoFinal" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Base.Theme.ProyectoFinal" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+    </style>
+
+    <style name="Theme.ProyectoFinal.Guinda" parent="Base.Theme.ProyectoFinal">
         <item name="colorPrimary">@color/guinda_ipn</item>
         <item name="colorPrimaryVariant">@color/guinda_ipn_dark</item>
-        <item name="colorOnPrimary">@color/white</item>
-
         <item name="colorSecondary">@color/azul_escom</item>
-        <item name="colorOnSecondary">@color/white</item>
-
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
     </style>
+
+    <style name="Theme.ProyectoFinal.Azul" parent="Base.Theme.ProyectoFinal">
+        <item name="colorPrimary">@color/azul_escom</item>
+        <item name="colorPrimaryVariant">@color/azul_escom_dark</item>
+        <item name="colorSecondary">@color/guinda_ipn</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="Theme.ProyectoFinal" parent="Theme.ProyectoFinal.Guinda" />
 </resources>

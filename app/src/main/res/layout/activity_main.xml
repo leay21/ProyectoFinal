@@ -4,32 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/gris_fondo">
+    android:background="@color/bg_screen"> <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/guinda_bg_header"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:elevation="4dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:text="Participación Ciudadana"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="Plataforma de reporte y asistencia"
+        android:textColor="#E0E0E0"
+        android:textSize="14sp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/guinda_bg_header"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:elevation="4dp">
-
-        <TextView
-            android:text="Participación Ciudadana"
-            android:textColor="@color/white"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:text="Plataforma de reporte y asistencia"
-            android:textColor="#E0E0E0"
-            android:textSize="14sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"/>
-    </LinearLayout>
+        android:layout_marginTop="4dp"/>
+</LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -44,12 +42,11 @@
             <TextView
                 android:text="Bienvenido. Esta aplicación te permite reportar incidencias en tu comunidad, visualizar zonas de riesgo en el mapa y consultar un directorio de ayuda verificado."
                 android:textSize="16sp"
-                android:textColor="#333333"
+                android:textColor="@color/text_primary"
                 android:lineSpacingExtra="4dp"
                 android:layout_marginBottom="32dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-
             <Button
                 android:id="@+id/btnIrReporte"
                 android:layout_width="match_parent"
@@ -74,7 +71,16 @@
                 android:layout_height="60dp"
                 android:text="Directorio de Instituciones"
                 android:textSize="16sp"
+                android:layout_marginBottom="16dp"
                 app:icon="@android:drawable/ic_menu_call"/>
+
+            <Button
+                android:id="@+id/btnCambiarTema"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="Cambiar Tema (Color)"
+                android:textSize="16sp"
+                app:icon="@android:drawable/ic_menu_view"/>
 
         </LinearLayout>
     </ScrollView>

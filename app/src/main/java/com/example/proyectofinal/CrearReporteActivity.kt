@@ -23,7 +23,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 
-class CrearReporteActivity : AppCompatActivity() {
+class CrearReporteActivity : BaseActivity() {
 
     private lateinit var binding: ActivityCrearReporteBinding
     private val viewModel: ReporteViewModel by viewModels()

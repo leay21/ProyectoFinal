@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -20,7 +21,7 @@ import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 
-class MapaIncidenciasActivity : AppCompatActivity() {
+class MapaIncidenciasActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMapaIncidenciasBinding
     private val viewModel: MapaViewModel by viewModels()
@@ -42,6 +43,11 @@ class MapaIncidenciasActivity : AppCompatActivity() {
 
         binding = ActivityMapaIncidenciasBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Lógica para cerrar el overlay full screen al tocarlo
+        binding.overlayLayout.setOnClickListener {
+            binding.overlayLayout.visibility = View.GONE
+        }
 
         // 1. Inicializamos el detector de toques (pero aun no lo agregamos)
         inicializarDetectorToques()
@@ -117,12 +123,7 @@ class MapaIncidenciasActivity : AppCompatActivity() {
     }
 
     private fun pintarMarcadores(reportes: List<Reporte>) {
-        // CORRECCIÓN IMPORTANTE:
-        // 1. Limpiamos todo
         binding.mapview.overlays.clear()
-
-        // 2. Inmediatamente RE-AGREGAMOS el detector de toques al fondo (índice 0)
-        // Esto soluciona que "no se puedan cerrar" los detalles
         binding.mapview.overlays.add(0, mapEventsOverlay)
 
         for (repo in reportes) {
@@ -130,15 +131,20 @@ class MapaIncidenciasActivity : AppCompatActivity() {
                 val marker = Marker(binding.mapview)
                 marker.position = GeoPoint(repo.latitud, repo.longitud)
                 marker.relatedObject = repo
-                marker.infoWindow = CustomInfoWindow(binding.mapview)
                 marker.title = repo.categoria
+
+                // AQUÍ PASAMOS EL CALLBACK
+                marker.infoWindow = CustomInfoWindow(binding.mapview) { bitmap ->
+                    // Esta función se ejecuta cuando tocan la foto pequeña
+                    binding.ivFullPreview.setImageBitmap(bitmap)
+                    binding.overlayLayout.visibility = View.VISIBLE
+                }
 
                 marker.setOnMarkerClickListener { m, map ->
                     m.showInfoWindow()
                     map.controller.animateTo(m.position)
                     true
                 }
-
                 binding.mapview.overlays.add(marker)
             }
         }
