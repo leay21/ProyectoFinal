@@ -8,14 +8,17 @@ import android.util.Base64
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
-// Cambiamos a AndroidViewModel para tener acceso al "context" y procesar la imagen
 class ReporteViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val db = FirebaseFirestore.getInstance()
+    // Inicializamos la BD local
+    private val db = AppDatabase.getDatabase(application)
+    private val dao = db.reporteDao()
     private val context = application.applicationContext
 
     private val _estadoEnvio = MutableLiveData<EstadoResult>()
@@ -24,47 +27,50 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
     fun enviarReporte(reporte: Reporte, imagenUri: Uri?) {
         _estadoEnvio.value = EstadoResult.Cargando
 
-        val reporteId = UUID.randomUUID().toString()
-        var stringBase64 = ""
-
-        // Lógica de conversión de imagen
-        if (imagenUri != null) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                val inputStream = context.contentResolver.openInputStream(imagenUri)
-                val bitmapOriginal = BitmapFactory.decodeStream(inputStream)
+                val reporteId = UUID.randomUUID().toString()
+                var stringBase64 = ""
 
-                // Comprimir imagen (Importante para no superar 1MB de Firestore)
-                stringBase64 = convertirBitmapABase64(bitmapOriginal)
+                // Procesar Imagen
+                if (imagenUri != null) {
+                    try {
+                        val inputStream = context.contentResolver.openInputStream(imagenUri)
+                        val bitmapOriginal = BitmapFactory.decodeStream(inputStream)
+                        stringBase64 = convertirBitmapABase64(bitmapOriginal)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                // Generar Jitter (Desplazamiento leve para no encimar marcadores)
+                val jitterLat = (Math.random() - 0.5) * 0.0002
+                val jitterLng = (Math.random() - 0.5) * 0.0002
+
+                val latFinal = if(reporte.latitud != 0.0) reporte.latitud + jitterLat else 0.0
+                val longFinal = if(reporte.longitud != 0.0) reporte.longitud + jitterLng else 0.0
+
+                val reporteFinal = reporte.copy(
+                    id = reporteId,
+                    fotoBase64 = stringBase64,
+                    latitud = latFinal,
+                    longitud = longFinal
+                )
+
+                // GUARDAR EN ROOM (Local)
+                dao.insertar(reporteFinal)
+
+                // Responder a la UI
+                _estadoEnvio.postValue(EstadoResult.Exito)
+
             } catch (e: Exception) {
-                e.printStackTrace()
+                _estadoEnvio.postValue(EstadoResult.Error("Error al guardar localmente: ${e.message}"))
             }
         }
-        val jitterLat = (Math.random() - 0.5) * 0.0002
-        val jitterLng = (Math.random() - 0.5) * 0.0002
-
-        val latitudFinal = if (reporte.latitud != 0.0) reporte.latitud + jitterLat else 0.0
-        val longitudFinal = if (reporte.longitud != 0.0) reporte.longitud + jitterLng else 0.0
-
-        val reporteFinal = reporte.copy(
-            id = reporteId,
-            fotoBase64 = stringBase64,
-            latitud = latitudFinal, // Usamos la coordenada con jitter
-            longitud = longitudFinal
-        )
-
-        // Guardar directamente en Firestore (sin Storage)
-        db.collection("reportes").document(reporteId).set(reporteFinal)
-            .addOnSuccessListener {
-                _estadoEnvio.value = EstadoResult.Exito
-            }
-            .addOnFailureListener {
-                _estadoEnvio.value = EstadoResult.Error(it.message ?: "Error desconocido")
-            }
     }
 
     private fun convertirBitmapABase64(bitmap: Bitmap): String {
         val outputStream = ByteArrayOutputStream()
-        // Comprimimos a JPEG con calidad 50% para reducir tamaño
         bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
         val byteArray = outputStream.toByteArray()
         return Base64.encodeToString(byteArray, Base64.DEFAULT)

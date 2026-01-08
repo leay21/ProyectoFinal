@@ -1,27 +1,18 @@
 package com.example.proyectofinal
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.FirebaseFirestore
 
-class MapaViewModel : ViewModel() {
+class MapaViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val db = AppDatabase.getDatabase(application)
 
-    // LiveData que contiene la lista de reportes
-    private val _reportes = MutableLiveData<List<Reporte>>()
-    val reportes: LiveData<List<Reporte>> get() = _reportes
+    // Room retorna LiveData directo, se actualiza solo si hay cambios
+    val reportes: LiveData<List<Reporte>> = db.reporteDao().obtenerTodos()
 
     fun cargarReportes() {
-        db.collection("reportes")
-            .get()
-            .addOnSuccessListener { result ->
-                val lista = result.toObjects(Reporte::class.java)
-                _reportes.value = lista
-            }
-            .addOnFailureListener {
-                // Manejar error si es necesario
-            }
+        // En Room con LiveData no es necesario llamar esto manualmente,
+        // pero lo dejamos vacío por si tu Activity lo llama.
     }
 }
