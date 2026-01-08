@@ -29,6 +29,9 @@ android {
             )
         }
     }
+    buildFeatures {
+        viewBinding = true
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -57,7 +60,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
 
     implementation("org.osmdroid:osmdroid-android:6.1.16")
-
+    implementation("com.google.android.gms:play-services-location:21.2.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -2,7 +2,6 @@ package com.example.proyectofinal
 
 import android.graphics.Color
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.proyectofinal.databinding.ActivityMapaIncidenciasBinding
@@ -21,7 +20,10 @@ class MapaIncidenciasActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // 1. Configuración OBLIGATORIA para OSMdroid (User Agent)
-        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+        Configuration.getInstance().load(
+            applicationContext,
+            getSharedPreferences("osmdroid_prefs", MODE_PRIVATE)
+        )
 
         binding = ActivityMapaIncidenciasBinding.inflate(layoutInflater)
         setContentView(binding.root)

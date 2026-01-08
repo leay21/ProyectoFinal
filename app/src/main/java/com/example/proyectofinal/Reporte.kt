@@ -3,11 +3,11 @@ package com.example.proyectofinal
 data class Reporte(
     var id: String = "",
     val categoria: String = "",
-    val descripcion: String = "", // Para detalles del incidente
-    val detallesExtra: Map<String, String> = emptyMap(), // Para campos específicos (ej. relación agresor, objetos robados)
+    val descripcion: String = "",
+    val detallesExtra: Map<String, String> = emptyMap(),
     val latitud: Double = 0.0,
     val longitud: Double = 0.0,
-    val imagenUrl: String = "",
+    val fotoBase64: String = "", // CAMBIO: Ahora guardamos el texto de la imagen
     val alias: String = "Anónimo",
     val fecha: Long = System.currentTimeMillis()
 )

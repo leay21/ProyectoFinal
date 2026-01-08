@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
-import com.example.proyectofinal.Reporte.databinding.ActivityCrearReporteBinding // Asegúrate de activar ViewBinding
+import com.example.proyectofinal.databinding.ActivityCrearReporteBinding
 
 
 class CrearReporteActivity : AppCompatActivity() {
