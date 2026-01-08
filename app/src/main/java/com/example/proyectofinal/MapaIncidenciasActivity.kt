@@ -13,6 +13,8 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.views.overlay.MapEventsOverlay
 
 class MapaIncidenciasActivity : AppCompatActivity() {
 
@@ -50,6 +52,23 @@ class MapaIncidenciasActivity : AppCompatActivity() {
         val startPoint = GeoPoint(19.4326, -99.1332)
         binding.mapview.controller.setZoom(12.0)
         binding.mapview.controller.setCenter(startPoint)
+
+        val mapEventsOverlay = MapEventsOverlay(object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
+                // Cierra todas las ventanas de información abiertas
+                binding.mapview.overlays.forEach {
+                    if (it is Marker) it.closeInfoWindow()
+                }
+                return true
+            }
+
+            override fun longPressHelper(p: GeoPoint?): Boolean {
+                return false
+            }
+        })
+
+        // Agregamos este overlay al principio para que no bloquee los clics de los marcadores
+        binding.mapview.overlays.add(0, mapEventsOverlay)
 
         // MEJORA 3: LISTENER PARA DETECTAR MOVIMIENTO O ZOOM
         binding.mapview.addMapListener(object : MapListener {
@@ -112,7 +131,7 @@ class MapaIncidenciasActivity : AppCompatActivity() {
 
         // 2. Obtener nuevo centro y calcular
         val centro = binding.mapview.mapCenter as GeoPoint
-        val radioMetros = 5000.0 // Radio de 5km
+        val radioMetros = 1000.0 // Radio de 1.5km
 
         var contador = 0
         for (repo in listaReportesLocal) {

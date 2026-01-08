@@ -39,11 +39,17 @@ class ReporteViewModel(application: Application) : AndroidViewModel(application)
                 e.printStackTrace()
             }
         }
+        val jitterLat = (Math.random() - 0.5) * 0.0002
+        val jitterLng = (Math.random() - 0.5) * 0.0002
 
-        // Creamos el reporte final con el ID y la imagen en texto
+        val latitudFinal = if (reporte.latitud != 0.0) reporte.latitud + jitterLat else 0.0
+        val longitudFinal = if (reporte.longitud != 0.0) reporte.longitud + jitterLng else 0.0
+
         val reporteFinal = reporte.copy(
             id = reporteId,
-            fotoBase64 = stringBase64
+            fotoBase64 = stringBase64,
+            latitud = latitudFinal, // Usamos la coordenada con jitter
+            longitud = longitudFinal
         )
 
         // Guardar directamente en Firestore (sin Storage)

@@ -15,6 +15,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.example.proyectofinal.databinding.ActivityCrearReporteBinding
+import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.views.overlay.Marker
 
 
 class CrearReporteActivity : AppCompatActivity() {
@@ -41,11 +47,16 @@ class CrearReporteActivity : AppCompatActivity() {
         }
     }
 
+    private var markerUbicacion: Marker? = null // Para mostrar dónde seleccionó
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Configuración OSM (Importante repetirlo aquí)
+        Configuration.getInstance().load(applicationContext, getSharedPreferences("osmdroid_prefs", MODE_PRIVATE))
         binding = ActivityCrearReporteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupMapaSeleccion() // <--- Nueva función
         setupSpinner()
         setupBotones()
         observarViewModel()
@@ -124,6 +135,9 @@ class CrearReporteActivity : AppCompatActivity() {
                 latitudActual = location.latitude
                 longitudActual = location.longitude
                 binding.tvUbicacion.text = "Ubicación: $latitudActual, $longitudActual"
+                // AGREGA ESTAS LÍNEAS PARA ACTUALIZAR TAMBIÉN EL MAPA VISUAL:
+                actualizarTextoUbicacion()
+                colocarMarcadorVisual(GeoPoint(latitudActual, longitudActual))
             } else {
                 Toast.makeText(this, "Enciende el GPS e intenta de nuevo", Toast.LENGTH_SHORT).show()
             }
@@ -173,5 +187,52 @@ class CrearReporteActivity : AppCompatActivity() {
                 else -> {}
             }
         }
+    }
+
+    private fun setupMapaSeleccion() {
+        binding.mapPickLocation.setTileSource(TileSourceFactory.MAPNIK)
+        binding.mapPickLocation.setMultiTouchControls(true)
+        binding.mapPickLocation.controller.setZoom(10.0)
+        // Centro default (CDMX)
+        binding.mapPickLocation.controller.setCenter(GeoPoint(19.4326, -99.1332))
+
+        // Detector de toques para poner el pin
+        val receiver = object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                latitudActual = p.latitude
+                longitudActual = p.longitude
+
+                actualizarTextoUbicacion()
+                colocarMarcadorVisual(p)
+                return true
+            }
+            override fun longPressHelper(p: GeoPoint?): Boolean = false
+        }
+
+        binding.mapPickLocation.overlays.add(MapEventsOverlay(receiver))
+    }
+
+    private fun colocarMarcadorVisual(p: GeoPoint) {
+        // Borrar marcador anterior si existe
+        if (markerUbicacion != null) {
+            binding.mapPickLocation.overlays.remove(markerUbicacion)
+        }
+
+        markerUbicacion = Marker(binding.mapPickLocation)
+        markerUbicacion?.position = p
+        markerUbicacion?.title = "Ubicación Seleccionada"
+        // Anclar el marcador al centro inferior (tipico pin)
+        markerUbicacion?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+        binding.mapPickLocation.overlays.add(markerUbicacion)
+        binding.mapPickLocation.invalidate()
+    }
+
+    private fun actualizarTextoUbicacion() {
+        // Función auxiliar para actualizar el TextView y no repetir código
+        // Formatear a 5 decimales para que no se vea enorme
+        val lat = String.format("%.5f", latitudActual)
+        val lon = String.format("%.5f", longitudActual)
+        binding.tvUbicacion.text = "Ubicación: $lat, $lon"
     }
 }
