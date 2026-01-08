@@ -216,7 +216,6 @@ class CrearReporteActivity : BaseActivity() {
     private fun enviarDatos() {
         val categoria = binding.spinnerCategoria.selectedItem.toString()
         val descripcion = binding.etDescripcion.text.toString()
-        val extra = binding.etDetalleExtra.text.toString()
         val alias = binding.etAlias.text.toString().ifEmpty { "Anónimo" }
 
         if (descripcion.isEmpty() || latitudActual == 0.0) {
@@ -224,12 +223,12 @@ class CrearReporteActivity : BaseActivity() {
             return
         }
 
-        val detallesMap = mapOf("info_adicional" to extra)
+        val extra = binding.etDetalleExtra.text.toString()
 
         val nuevoReporte = Reporte(
             categoria = categoria,
             descripcion = descripcion,
-            detallesExtra = detallesMap,
+            infoAdicional = extra,
             latitud = latitudActual,
             longitud = longitudActual,
             alias = alias
