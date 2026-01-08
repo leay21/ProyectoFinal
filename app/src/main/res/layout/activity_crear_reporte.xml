@@ -1,109 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/white">
 
-        <TextView
-            android:text="Nuevo Reporte Ciudadano"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:text="Categoría"
-            android:layout_marginTop="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Spinner
-            android:id="@+id/spinnerCategoria"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="48dp"/>
+            android:background="@color/guinda_bg_header"
+            android:padding="16dp">
+            <TextView
+                android:text="Nuevo Reporte"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
 
-        <EditText
-            android:id="@+id/etDescripcion"
-            android:hint="Descripción de lo sucedido"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"/>
+            android:layout_height="match_parent"
+            android:padding="16dp">
 
-        <EditText
-            android:id="@+id/etAlias"
-            android:hint="Alias (Opcional)"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="40dp">
 
-        <EditText
-            android:id="@+id/etDetalleExtra"
-            android:hint="Detalles adicionales (Ej. Objetos robados, Dependencia)"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"/>
+                <TextView
+                    android:text="Categoría del Incidente"
+                    android:textStyle="bold"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
 
-        <Button
-            android:id="@+id/btnFoto"
-            android:text="Adjuntar Evidencia (Cámara/Galería)"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"/>
+                <Spinner
+                    android:id="@+id/spinnerCategoria"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:layout_marginBottom="20dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:hint="Descripción de lo sucedido">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etDescripcion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <EditText
+                    android:id="@+id/etAlias"
+                    android:hint="Alias (Opcional)"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"/>
+
+                <EditText
+                    android:id="@+id/etDetalleExtra"
+                    android:hint="Detalles adicionales"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"/>
+
+                <Button
+                    android:id="@+id/btnFoto"
+                    android:text="Adjuntar Evidencia (Cámara/Galería)"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"/>
+
+                <TextView
+                    android:text="(Toca la imagen para ver en pantalla completa)"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:textColor="#777"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <ImageView
+                    android:id="@+id/ivPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    android:background="#F0F0F0"
+                    android:layout_marginBottom="30dp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/tvUbicacion"
+                    android:text="Ubicación:"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"/>
+
+                <org.osmdroid.views.MapView
+                    android:id="@+id/mapPickLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="350dp"
+                    android:background="#E0E0E0"
+                    android:layout_marginBottom="20dp"/>
+
+                <Button
+                    android:id="@+id/btnObtenerUbicacion"
+                    android:text="Usar mi Ubicación GPS"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="30dp"/>
+
+                <Button
+                    android:id="@+id/btnEnviar"
+                    android:text="ENVIAR REPORTE"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"/>
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/overlayLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/overlay_black"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
 
         <ImageView
-            android:id="@+id/ivPreview"
+            android:id="@+id/ivFullPreview"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:background="#E0E0E0"
-            android:visibility="gone"/>
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:layout_margin="20dp"/>
 
         <TextView
-            android:id="@+id/tvUbicacion"
-            android:text="Ubicación: Pendiente"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"/>
-
-        <Button
-            android:id="@+id/btnObtenerUbicacion"
-            android:text="Obtener Ubicación GPS"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:text="O selecciona en el mapa:"
-            android:layout_marginTop="8dp"
+            android:text="Toca para cerrar"
+            android:textColor="@color/white"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="40dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+    </FrameLayout>
 
-        <org.osmdroid.views.MapView
-            android:id="@+id/mapPickLocation"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"
-            android:background="#E0E0E0"/>
-
-        <Button
-            android:id="@+id/btnEnviar"
-            android:text="ENVIAR REPORTE"
-            android:backgroundTint="#D32F2F"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"/>
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
-
-    </LinearLayout>
-</ScrollView>
+</FrameLayout>

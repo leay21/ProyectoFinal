@@ -2,4 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-</resources>
+
+    <color name="guinda_ipn">#6B2E5F</color>
+    <color name="guinda_ipn_dark">#4A1F41</color>
+    <color name="guinda_bg_header">#6B2E5F</color>
+
+    <color name="azul_escom">#003D6D</color>
+    <color name="azul_escom_dark">#002645</color>
+
+    <color name="gris_fondo">#F5F5F5</color>
+    <color name="overlay_black">#CC000000</color> </resources>

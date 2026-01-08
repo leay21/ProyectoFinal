@@ -58,13 +58,24 @@ class CrearReporteActivity : AppCompatActivity() {
         binding = ActivityCrearReporteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // --- LÓGICA DE IMAGEN FULL SCREEN ---
+        binding.ivPreview.setOnClickListener {
+            // Solo abrir si hay imagen
+            if (binding.ivPreview.drawable != null) {
+                binding.ivFullPreview.setImageDrawable(binding.ivPreview.drawable)
+                binding.overlayLayout.visibility = View.VISIBLE
+            }
+        }
+
+        binding.overlayLayout.setOnClickListener {
+            binding.overlayLayout.visibility = View.GONE
+        }
+        // ------------------------------------
+
         setupSpinner()
         setupBotones()
         setupMapaSeleccion()
-
-        // NUEVO: Intentar centrar el mapa pequeño en tu ubicación al abrir
         centrarMapaEnUbicacionActual()
-
         observarViewModel()
     }
 
