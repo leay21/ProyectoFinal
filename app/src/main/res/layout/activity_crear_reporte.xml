@@ -13,11 +13,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/guinda_bg_header"
+            android:background="?attr/colorPrimary"
             android:padding="16dp">
+
             <TextView
                 android:text="Nuevo Reporte"
-                android:textColor="@color/white"
+                android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
@@ -172,7 +173,7 @@
 
         <TextView
             android:text="Toca para cerrar"
-            android:textColor="@color/white"
+            android:textColor="#FFFFFF"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="40dp"
             android:layout_width="wrap_content"
