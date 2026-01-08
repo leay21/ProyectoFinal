@@ -4,6 +4,8 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,8 +54,49 @@ class CrearReporteActivity : AppCompatActivity() {
     private fun setupSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categorias)
         binding.spinnerCategoria.adapter = adapter
+
+        // LISTENER PARA DETECTAR CAMBIOS DE CATEGORÍA
+        binding.spinnerCategoria.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                actualizarFormulario(categorias[position])
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
+    // Lógica para cambiar los campos dinámicamente
+    private fun actualizarFormulario(categoria: String) {
+        // Limpiamos el campo anterior para evitar confusiones
+        binding.etDetalleExtra.text.clear()
+
+        when (categoria) {
+            "Servicios Públicos" -> {
+                binding.etDetalleExtra.visibility = View.VISIBLE
+                binding.etDetalleExtra.hint = "Especifique: Baches, Luminarias o Fuga de agua"
+            }
+            "Robo o Asalto" -> {
+                binding.etDetalleExtra.visibility = View.VISIBLE
+                binding.etDetalleExtra.hint = "¿Qué objetos fueron sustraídos?"
+            }
+            "Corrupción u Omisión" -> {
+                binding.etDetalleExtra.visibility = View.VISIBLE
+                binding.etDetalleExtra.hint = "Nombre de la dependencia o servidor público"
+            }
+            "Violencia de Género" -> {
+                binding.etDetalleExtra.visibility = View.VISIBLE
+                binding.etDetalleExtra.hint = "Relación con el agresor (Pareja, Familiar, Desconocido)"
+            }
+            "Narcomenudeo" -> {
+                binding.etDetalleExtra.visibility = View.VISIBLE
+                binding.etDetalleExtra.hint = "Descripción de personas o vehículos sospechosos"
+            }
+            "Reporte General" -> {
+                binding.etDetalleExtra.visibility = View.VISIBLE
+                binding.etDetalleExtra.hint = "Información adicional relevante"
+            }
+        }
+    }
     private fun setupBotones() {
         binding.btnFoto.setOnClickListener {
             getContent.launch("image/*") // Abre galería

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:drawable/dialog_holo_light_frame"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tvTituloBubble"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Título"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#000000"/>
+
+    <TextView
+        android:id="@+id/tvFechaBubble"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Fecha: DD/MM/AAAA"
+        android:textSize="12sp"
+        android:textColor="#555555"
+        android:layout_marginBottom="4dp"/>
+
+    <TextView
+        android:id="@+id/tvDescripcionBubble"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Descripción..."
+        android:textColor="#000000"
+        android:layout_marginBottom="8dp"/>
+
+    <ImageView
+        android:id="@+id/ivEvidenciaBubble"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:background="#EEEEEE"/>
+
+</LinearLayout>
