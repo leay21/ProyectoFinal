@@ -1,27 +1,34 @@
 package com.example.proyectofinal
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.example.proyectofinal.databinding.ActivityMapaIncidenciasBinding
+import com.google.android.gms.location.LocationServices
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import org.osmdroid.events.MapEventsReceiver
-import org.osmdroid.views.overlay.MapEventsOverlay
 
 class MapaIncidenciasActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMapaIncidenciasBinding
     private val viewModel: MapaViewModel by viewModels()
 
-    // Guardamos la lista localmente para recalcular sin volver a descargar de internet
+    // Variable para el detector de toques (para cerrar ventanas)
+    private lateinit var mapEventsOverlay: MapEventsOverlay
+
+    // Guardamos la lista localmente
     private var listaReportesLocal: List<Reporte> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,24 +43,25 @@ class MapaIncidenciasActivity : AppCompatActivity() {
         binding = ActivityMapaIncidenciasBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 1. Inicializamos el detector de toques (pero aun no lo agregamos)
+        inicializarDetectorToques()
+
         setupMapa()
+
+        // 2. Intentamos centrar en ubicación real
+        centrarEnUbicacionActual()
+
         viewModel.cargarReportes()
 
         viewModel.reportes.observe(this) { listaReportes ->
-            listaReportesLocal = listaReportes // Guardar referencia local
+            listaReportesLocal = listaReportes
             pintarMarcadores(listaReportes)
-            calcularZonasDeCalor() // Primer cálculo
+            calcularZonasDeCalor()
         }
     }
 
-    private fun setupMapa() {
-        binding.mapview.setTileSource(TileSourceFactory.MAPNIK)
-        binding.mapview.setMultiTouchControls(true)
-        val startPoint = GeoPoint(19.4326, -99.1332)
-        binding.mapview.controller.setZoom(12.0)
-        binding.mapview.controller.setCenter(startPoint)
-
-        val mapEventsOverlay = MapEventsOverlay(object : MapEventsReceiver {
+    private fun inicializarDetectorToques() {
+        mapEventsOverlay = MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                 // Cierra todas las ventanas de información abiertas
                 binding.mapview.overlays.forEach {
@@ -66,46 +74,67 @@ class MapaIncidenciasActivity : AppCompatActivity() {
                 return false
             }
         })
+    }
 
-        // Agregamos este overlay al principio para que no bloquee los clics de los marcadores
-        binding.mapview.overlays.add(0, mapEventsOverlay)
+    private fun setupMapa() {
+        binding.mapview.setTileSource(TileSourceFactory.MAPNIK)
+        binding.mapview.setMultiTouchControls(true)
+        binding.mapview.controller.setZoom(15.0) // Zoom más cercano por defecto
 
-        // MEJORA 3: LISTENER PARA DETECTAR MOVIMIENTO O ZOOM
+        // Coordenada por defecto (CDMX) por si falla el GPS
+        val startPoint = GeoPoint(19.4326, -99.1332)
+        binding.mapview.controller.setCenter(startPoint)
+
+        // Listener para movimiento/zoom
         binding.mapview.addMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean {
-                calcularZonasDeCalor() // Recalcular al mover
+                calcularZonasDeCalor()
                 return true
             }
 
             override fun onZoom(event: ZoomEvent?): Boolean {
-                calcularZonasDeCalor() // Recalcular al hacer zoom
+                calcularZonasDeCalor()
                 return true
             }
         })
     }
 
+    private fun centrarEnUbicacionActual() {
+        // Verificar permisos
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+            return // Si no hay permiso, se queda en la coordenada por defecto (CDMX)
+        }
+
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val miUbicacion = GeoPoint(location.latitude, location.longitude)
+                binding.mapview.controller.animateTo(miUbicacion)
+                binding.mapview.controller.setZoom(16.0) // Acercar a mi ubicación
+            }
+        }
+    }
+
     private fun pintarMarcadores(reportes: List<Reporte>) {
-        // Limpiamos overlays (pero cuidado, esto borra también el círculo,
-        // así que el orden importa: primero marcadores, luego círculo en calcularZonas)
+        // CORRECCIÓN IMPORTANTE:
+        // 1. Limpiamos todo
         binding.mapview.overlays.clear()
+
+        // 2. Inmediatamente RE-AGREGAMOS el detector de toques al fondo (índice 0)
+        // Esto soluciona que "no se puedan cerrar" los detalles
+        binding.mapview.overlays.add(0, mapEventsOverlay)
 
         for (repo in reportes) {
             if (repo.latitud != 0.0 && repo.longitud != 0.0) {
                 val marker = Marker(binding.mapview)
                 marker.position = GeoPoint(repo.latitud, repo.longitud)
-
-                // IMPORTANTE: Guardamos el objeto completo para usarlo en el InfoWindow
                 marker.relatedObject = repo
-
-                // Asignamos nuestra ventana personalizada (MEJORA 2)
                 marker.infoWindow = CustomInfoWindow(binding.mapview)
-
-                // Título de respaldo
                 marker.title = repo.categoria
 
                 marker.setOnMarkerClickListener { m, map ->
                     m.showInfoWindow()
-                    // Centrar mapa en el marcador al tocarlo (opcional)
                     map.controller.animateTo(m.position)
                     true
                 }
@@ -117,11 +146,9 @@ class MapaIncidenciasActivity : AppCompatActivity() {
     }
 
     private fun calcularZonasDeCalor() {
-        // Si no hay reportes, no hacemos nada
         if (listaReportesLocal.isEmpty()) return
 
-        // 1. Eliminar círculos anteriores para no encimarlos
-        // Iteramos al revés para remover seguros
+        // Eliminar solo los polígonos de zona de calor anteriores
         for (i in binding.mapview.overlays.size - 1 downTo 0) {
             val overlay = binding.mapview.overlays[i]
             if (overlay is Polygon && overlay.title == "Zona de Densidad") {
@@ -129,9 +156,8 @@ class MapaIncidenciasActivity : AppCompatActivity() {
             }
         }
 
-        // 2. Obtener nuevo centro y calcular
         val centro = binding.mapview.mapCenter as GeoPoint
-        val radioMetros = 1000.0 // Radio de 1.5km
+        val radioMetros = 1000.0
 
         var contador = 0
         for (repo in listaReportesLocal) {
@@ -142,9 +168,9 @@ class MapaIncidenciasActivity : AppCompatActivity() {
         }
 
         val colorZona = when {
-            contador > 10 -> Color.parseColor("#40FF0000") // Rojo
-            contador > 5 -> Color.parseColor("#40FFFF00")  // Amarillo
-            else -> Color.parseColor("#4000FF00")          // Verde
+            contador > 10 -> Color.parseColor("#40FF0000")
+            contador > 5 -> Color.parseColor("#40FFFF00")
+            else -> Color.parseColor("#4000FF00")
         }
 
         val circulo = Polygon()
@@ -153,7 +179,8 @@ class MapaIncidenciasActivity : AppCompatActivity() {
         circulo.outlinePaint.color = Color.TRANSPARENT
         circulo.title = "Zona de Densidad"
 
-        // Agregar al índice 0 para que quede DETRÁS de los marcadores
+        // Agregar al índice 0 para que quede DETRÁS, pero después del detector de toques si es posible
+        // Ojo: Si ponemos index 0, queda abajo de todo.
         binding.mapview.overlays.add(0, circulo)
         binding.mapview.invalidate()
     }

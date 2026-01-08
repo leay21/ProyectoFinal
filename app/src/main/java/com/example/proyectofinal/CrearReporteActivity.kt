@@ -1,4 +1,5 @@
 package com.example.proyectofinal
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
@@ -13,15 +14,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.LocationServices
 import com.example.proyectofinal.databinding.ActivityCrearReporteBinding
+import com.google.android.gms.location.LocationServices
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
-
 
 class CrearReporteActivity : AppCompatActivity() {
 
@@ -32,33 +32,39 @@ class CrearReporteActivity : AppCompatActivity() {
     private var latitudActual: Double = 0.0
     private var longitudActual: Double = 0.0
 
+    // Marcador visual para el mapa pequeño
+    private var markerUbicacion: Marker? = null
+
     // Categorías obligatorias
     private val categorias = listOf(
         "Servicios Públicos", "Robo o Asalto", "Corrupción u Omisión",
         "Violencia de Género", "Narcomenudeo", "Reporte General"
     )
 
-    // Launcher para obtener imagen
     private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imagenUriSeleccionada = it
             binding.ivPreview.setImageURI(it)
-            binding.ivPreview.visibility = android.view.View.VISIBLE
+            binding.ivPreview.visibility = View.VISIBLE
         }
     }
 
-    private var markerUbicacion: Marker? = null // Para mostrar dónde seleccionó
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configuración OSM (Importante repetirlo aquí)
+
+        // Configuración OSM
         Configuration.getInstance().load(applicationContext, getSharedPreferences("osmdroid_prefs", MODE_PRIVATE))
+
         binding = ActivityCrearReporteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupMapaSeleccion() // <--- Nueva función
         setupSpinner()
         setupBotones()
+        setupMapaSeleccion()
+
+        // NUEVO: Intentar centrar el mapa pequeño en tu ubicación al abrir
+        centrarMapaEnUbicacionActual()
+
         observarViewModel()
     }
 
@@ -66,21 +72,16 @@ class CrearReporteActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categorias)
         binding.spinnerCategoria.adapter = adapter
 
-        // LISTENER PARA DETECTAR CAMBIOS DE CATEGORÍA
         binding.spinnerCategoria.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 actualizarFormulario(categorias[position])
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
-    // Lógica para cambiar los campos dinámicamente
     private fun actualizarFormulario(categoria: String) {
-        // Limpiamos el campo anterior para evitar confusiones
         binding.etDetalleExtra.text.clear()
-
         when (categoria) {
             "Servicios Públicos" -> {
                 binding.etDetalleExtra.visibility = View.VISIBLE
@@ -96,11 +97,11 @@ class CrearReporteActivity : AppCompatActivity() {
             }
             "Violencia de Género" -> {
                 binding.etDetalleExtra.visibility = View.VISIBLE
-                binding.etDetalleExtra.hint = "Relación con el agresor (Pareja, Familiar, Desconocido)"
+                binding.etDetalleExtra.hint = "Relación con el agresor"
             }
             "Narcomenudeo" -> {
                 binding.etDetalleExtra.visibility = View.VISIBLE
-                binding.etDetalleExtra.hint = "Descripción de personas o vehículos sospechosos"
+                binding.etDetalleExtra.hint = "Descripción de personas o vehículos"
             }
             "Reporte General" -> {
                 binding.etDetalleExtra.visibility = View.VISIBLE
@@ -108,18 +109,50 @@ class CrearReporteActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun setupMapaSeleccion() {
+        binding.mapPickLocation.setTileSource(TileSourceFactory.MAPNIK)
+        binding.mapPickLocation.setMultiTouchControls(true)
+        binding.mapPickLocation.controller.setZoom(15.0)
+        // Centro default (CDMX)
+        binding.mapPickLocation.controller.setCenter(GeoPoint(19.4326, -99.1332))
+
+        val receiver = object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                latitudActual = p.latitude
+                longitudActual = p.longitude
+                actualizarTextoUbicacion()
+                colocarMarcadorVisual(p)
+                return true
+            }
+            override fun longPressHelper(p: GeoPoint?): Boolean = false
+        }
+
+        binding.mapPickLocation.overlays.add(MapEventsOverlay(receiver))
+    }
+
+    // NUEVA FUNCIÓN: Centra el mapa automáticamente al inicio
+    private fun centrarMapaEnUbicacionActual() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            == PackageManager.PERMISSION_GRANTED) {
+
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    val punto = GeoPoint(location.latitude, location.longitude)
+                    binding.mapPickLocation.controller.animateTo(punto)
+                    binding.mapPickLocation.controller.setZoom(16.0)
+                }
+            }
+        }
+    }
+
     private fun setupBotones() {
-        binding.btnFoto.setOnClickListener {
-            getContent.launch("image/*") // Abre galería
-        }
+        binding.btnFoto.setOnClickListener { getContent.launch("image/*") }
 
-        binding.btnObtenerUbicacion.setOnClickListener {
-            obtenerUbicacion()
-        }
+        binding.btnObtenerUbicacion.setOnClickListener { obtenerUbicacion() }
 
-        binding.btnEnviar.setOnClickListener {
-            enviarDatos()
-        }
+        binding.btnEnviar.setOnClickListener { enviarDatos() }
     }
 
     private fun obtenerUbicacion() {
@@ -134,14 +167,39 @@ class CrearReporteActivity : AppCompatActivity() {
             if (location != null) {
                 latitudActual = location.latitude
                 longitudActual = location.longitude
-                binding.tvUbicacion.text = "Ubicación: $latitudActual, $longitudActual"
-                // AGREGA ESTAS LÍNEAS PARA ACTUALIZAR TAMBIÉN EL MAPA VISUAL:
+
+                // Actualizamos texto y mapa visualmente
                 actualizarTextoUbicacion()
-                colocarMarcadorVisual(GeoPoint(latitudActual, longitudActual))
+                val punto = GeoPoint(latitudActual, longitudActual)
+                colocarMarcadorVisual(punto)
+
+                // Movemos el mapa ahí también
+                binding.mapPickLocation.controller.animateTo(punto)
+                binding.mapPickLocation.controller.setZoom(17.0)
+
             } else {
                 Toast.makeText(this, "Enciende el GPS e intenta de nuevo", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun colocarMarcadorVisual(p: GeoPoint) {
+        if (markerUbicacion != null) {
+            binding.mapPickLocation.overlays.remove(markerUbicacion)
+        }
+        markerUbicacion = Marker(binding.mapPickLocation)
+        markerUbicacion?.position = p
+        markerUbicacion?.title = "Ubicación Seleccionada"
+        markerUbicacion?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+
+        binding.mapPickLocation.overlays.add(markerUbicacion)
+        binding.mapPickLocation.invalidate()
+    }
+
+    private fun actualizarTextoUbicacion() {
+        val lat = String.format("%.5f", latitudActual)
+        val lon = String.format("%.5f", longitudActual)
+        binding.tvUbicacion.text = "Ubicación: $lat, $lon"
     }
 
     private fun enviarDatos() {
@@ -167,7 +225,7 @@ class CrearReporteActivity : AppCompatActivity() {
         )
 
         binding.btnEnviar.isEnabled = false
-        binding.progressBar.visibility = android.view.View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
         viewModel.enviarReporte(nuevoReporte, imagenUriSeleccionada)
     }
 
@@ -175,64 +233,17 @@ class CrearReporteActivity : AppCompatActivity() {
         viewModel.estadoEnvio.observe(this) { estado ->
             when (estado) {
                 is ReporteViewModel.EstadoResult.Exito -> {
-                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.progressBar.visibility = View.GONE
                     Toast.makeText(this, "Reporte enviado correctamente", Toast.LENGTH_LONG).show()
-                    finish() // Cierra la actividad
+                    finish()
                 }
                 is ReporteViewModel.EstadoResult.Error -> {
-                    binding.progressBar.visibility = android.view.View.GONE
+                    binding.progressBar.visibility = View.GONE
                     binding.btnEnviar.isEnabled = true
                     Toast.makeText(this, "Error: ${estado.mensaje}", Toast.LENGTH_LONG).show()
                 }
                 else -> {}
             }
         }
-    }
-
-    private fun setupMapaSeleccion() {
-        binding.mapPickLocation.setTileSource(TileSourceFactory.MAPNIK)
-        binding.mapPickLocation.setMultiTouchControls(true)
-        binding.mapPickLocation.controller.setZoom(10.0)
-        // Centro default (CDMX)
-        binding.mapPickLocation.controller.setCenter(GeoPoint(19.4326, -99.1332))
-
-        // Detector de toques para poner el pin
-        val receiver = object : MapEventsReceiver {
-            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
-                latitudActual = p.latitude
-                longitudActual = p.longitude
-
-                actualizarTextoUbicacion()
-                colocarMarcadorVisual(p)
-                return true
-            }
-            override fun longPressHelper(p: GeoPoint?): Boolean = false
-        }
-
-        binding.mapPickLocation.overlays.add(MapEventsOverlay(receiver))
-    }
-
-    private fun colocarMarcadorVisual(p: GeoPoint) {
-        // Borrar marcador anterior si existe
-        if (markerUbicacion != null) {
-            binding.mapPickLocation.overlays.remove(markerUbicacion)
-        }
-
-        markerUbicacion = Marker(binding.mapPickLocation)
-        markerUbicacion?.position = p
-        markerUbicacion?.title = "Ubicación Seleccionada"
-        // Anclar el marcador al centro inferior (tipico pin)
-        markerUbicacion?.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
-        binding.mapPickLocation.overlays.add(markerUbicacion)
-        binding.mapPickLocation.invalidate()
-    }
-
-    private fun actualizarTextoUbicacion() {
-        // Función auxiliar para actualizar el TextView y no repetir código
-        // Formatear a 5 decimales para que no se vea enorme
-        val lat = String.format("%.5f", latitudActual)
-        val lon = String.format("%.5f", longitudActual)
-        binding.tvUbicacion.text = "Ubicación: $lat, $lon"
     }
 }
