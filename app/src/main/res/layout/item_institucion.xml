@@ -36,6 +36,15 @@
             android:text="Dirección..."
             android:textSize="14sp" />
 
+        <TextView
+            android:id="@+id/tvHorario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Horario: ..."
+            android:textSize="13sp"
+            android:textColor="#555555"
+            android:layout_marginTop="4dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

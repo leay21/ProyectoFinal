@@ -9,10 +9,19 @@
         android:text="Directorio de Ayuda"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <SearchView
+        android:id="@+id/svBuscador"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:queryHint="Buscar institución..."
+        android:iconifiedByDefault="false"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/ic_launcher_background"
+        android:backgroundTint="#F0F0F0"/>
     <TextView
         android:text="Filtrar por Categoría:"
         android:layout_width="wrap_content"
