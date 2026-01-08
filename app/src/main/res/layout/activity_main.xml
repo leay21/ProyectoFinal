@@ -19,4 +19,11 @@
         android:layout_marginTop="20dp"
         android:text="Ver Mapa de Incidencias" />
 
+    <Button
+        android:id="@+id/btnIrDirectorio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Directorio de Instituciones" />
+
 </LinearLayout>

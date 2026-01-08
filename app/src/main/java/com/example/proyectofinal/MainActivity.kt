@@ -27,5 +27,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, MapaIncidenciasActivity::class.java)
             startActivity(intent)
         }
+
+        binding.btnIrDirectorio.setOnClickListener {
+            val intent = Intent(this, DirectorioActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
